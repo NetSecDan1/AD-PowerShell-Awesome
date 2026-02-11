@@ -1344,9 +1344,9 @@ try {
             continue
         }
 
-        $eventTotal = $authEvents.TGTRequests.Count +
-                      $authEvents.ServiceTickets.Count +
-                      $authEvents.CredCacheEvents.Count
+        $eventTotal = @($authEvents.TGTRequests).Count +
+                      @($authEvents.ServiceTickets).Count +
+                      @($authEvents.CredCacheEvents).Count
 
         Write-Verbose "[$rodc] Total raw events collected: $eventTotal"
 
@@ -1381,7 +1381,7 @@ try {
         # Build transactions
         $transactions = Build-AuthTransactions -AuthEvents $authEvents -ComputerName $rodc -WindowSeconds $script:TransactionWindowSeconds
 
-        if ($transactions -and $transactions.Count -gt 0) {
+        if ($transactions -and @($transactions).Count -gt 0) {
             foreach ($txn in $transactions) {
                 [void]$allTransactions.Add($txn)
             }
@@ -1392,7 +1392,7 @@ try {
 
         # Per-RODC analysis
         $perRodcAnalysis = $null
-        if ($transactions.Count -gt 0) {
+        if (@($transactions).Count -gt 0) {
             $perRodcAnalysis = Get-TransactionAnalysis -Transactions $transactions `
                                                        -LocalThreshold $LocalLatencyThresholdMs `
                                                        -HubThreshold $HubLatencyThresholdMs

@@ -468,7 +468,10 @@ function Get-AuthenticationFailures {
             $result.SampleEvents.Add([PSCustomObject][ordered]@{
                 TimeCreated = $evt.TimeCreated
                 EventID     = $evt.Id
-                Message     = ($evt.Message -replace "`r`n", ' ').Substring(0, [Math]::Min(500, $evt.Message.Length))
+                Message     = $(
+                    $cleanMsg = ($evt.Message -replace "`r`n", ' ')
+                    if ($cleanMsg.Length -le 500) { $cleanMsg } else { $cleanMsg.Substring(0, 500) }
+                )
             })
         }
     }

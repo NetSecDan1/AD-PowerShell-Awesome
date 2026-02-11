@@ -1383,7 +1383,12 @@ function Export-Reports {
                 HighRiskExclusions         = @($Recommendations | Where-Object { $_.Recommendation -like 'Exclude*' }).Count
                 CentralizedStrategy        = @($Recommendations | Where-Object { $_.Recommendation -eq 'Centralized Strategy' }).Count
                 AlreadyCached              = @($Recommendations | Where-Object { $_.Recommendation -eq 'Already Cached' }).Count
-                EstimatedFallbackReduction = "$([math]::Round(($(@($Recommendations | Where-Object { $_.Recommendation -eq 'Add to Allow List' }) | Measure-Object -Property TotalRequests -Sum).Sum / [math]::Max(1, ($Recommendations | Where-Object { $_.PRPStatus -notin @('Cached (Revealed)', 'In Allow List') } | Measure-Object -Property TotalRequests -Sum).Sum) * 100, 1))%"
+                EstimatedFallbackReduction = $(
+                    $addToAllowSum = ($Recommendations | Where-Object { $_.Recommendation -eq 'Add to Allow List' } | Measure-Object -Property TotalRequests -Sum).Sum
+                    $nonCachedSum  = ($Recommendations | Where-Object { $_.PRPStatus -notin @('Cached (Revealed)', 'In Allow List') } | Measure-Object -Property TotalRequests -Sum).Sum
+                    $reductionPct  = [math]::Round(($addToAllowSum / [math]::Max(1, $nonCachedSum)) * 100, 1)
+                    "$reductionPct%"
+                )
             }
             Recommendations    = @($Recommendations | ForEach-Object {
                 [ordered]@{
